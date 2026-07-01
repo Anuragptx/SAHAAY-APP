@@ -1,45 +1,78 @@
-# [Project name]
+# Alertify — Anonymous Localized SOS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A privacy-first emergency broadcast app. Users send SOS alerts (Medical, Safety, Technical Help) anonymously with GPS location — no account required. Nearby helpers see alerts on a live map and can open an ephemeral 2-hour chat.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/alertify run dev` — run the frontend (port auto-assigned by Replit)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Firebase configuration lives in `artifacts/alertify/src/lib/firebase.ts`
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- **Frontend:** React 18 + Vite + Tailwind CSS v4
+- **Mapping:** Leaflet.js (vanilla, in useEffect)
+- **Realtime backend:** Firebase Firestore
+- **Fonts/Icons:** Inter + Material Symbols Outlined (Google CDN)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/alertify/src/` — main frontend app
+  - `lib/firebase.ts` — **Firebase config + all Firestore helpers** (replace placeholder keys here)
+  - `lib/session.ts` — anonymous session ID (crypto.randomUUID, persisted in localStorage)
+  - `lib/geo.ts` — geolocation, Haversine distance, coord formatting
+  - `pages/SOSDashboard.tsx` — SOS broadcast screen
+  - `pages/LiveMap.tsx` — Leaflet map with real-time alert markers (2km radius)
+  - `pages/Chat.tsx` — ephemeral per-alert chat
+  - `components/BottomNav.tsx` — tab navigation
+- `artifacts/alertify/src/index.css` — Tailwind v4 design tokens (Alertify color palette)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **No auth:** Session IDs use `crypto.randomUUID()` for randomness, stored only in localStorage. Server never sees them.
+- **Firebase Firestore** for real-time alert sync — each alert has an `expiresAt` Timestamp (2hr TTL). Client-side filtering on every snapshot drops expired docs without re-querying.
+- **2km radius:** LiveMap subscribes to all non-expired alerts but filters markers to ≤2km from the user's GPS position. Without GPS, all alerts are shown.
+- **Ephemeral chat:** Each message gets its own `expiresAt` field matching the parent alert's 2hr TTL. No permanent message history.
+- **Leaflet** initialised in a `useEffect` with cleanup on unmount. Markers tracked in a `Map<id, L.Marker>` ref and reconciled on every Firestore snapshot.
+
+## Firebase Setup
+
+1. Create a project at https://console.firebase.google.com/
+2. Enable **Firestore Database** (test mode for dev)
+3. Copy your `firebaseConfig` object into `artifacts/alertify/src/lib/firebase.ts`
+4. Paste these **Security Rules** in Firestore → Rules:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /alerts/{alertId} {
+         allow read: if true;
+         allow create: if request.resource.data.expiresAt is timestamp;
+         allow delete: if true;
+       }
+       match /chats/{alertId}/messages/{msgId} {
+         allow read, write: if true;
+       }
+     }
+   }
+   ```
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- **SOS Dashboard** — pulsing broadcast button, GPS location card, specific assistance categories
+- **Live Map** — OpenStreetMap tiles via Leaflet, colored markers by type (Red/Blue/Yellow), 2km radius circle, alert popup with "I Can Help" button
+- **Ephemeral Chat** — real-time Firestore messages, auto-expire after 2h, no history stored
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- App name: **Alertify** (not Sahaay)
+- Anonymous by default — no login ever
+- Alert categories: Medical (red), Safety (blue), Technical Help (yellow)
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- The app requires Firebase config to be filled in before alerts/chat work. The UI shows a setup notice until then.
+- GPS must be granted in the browser. Denied GPS shows a banner and falls back to showing all alerts on the map.
+- Firestore `where('expiresAt', '>', ...)` requires a composite index if sorting by another field — Firestore will prompt you with a direct link to create it on first query.

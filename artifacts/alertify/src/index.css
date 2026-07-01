@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* ============================================================
+   ALERTIFY DESIGN TOKENS
+   Colors derived from the Alertify design system
+   ============================================================ */
+@theme inline {
+  /* Primary — Alertify Red */
+  --color-primary: #b70011;
+  --color-primary-dark: #93000b;
+  --color-primary-container: #dc2626;
+  --color-on-primary: #ffffff;
+  --color-primary-fixed: #ffdad6;
+  --color-primary-fixed-dim: #ffb4ab;
+
+  /* Surface */
+  --color-surface: #f9f9ff;
+  --color-background: #f9f9ff;
+  --color-surface-dim: #d3daef;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f1f3ff;
+  --color-surface-container: #e9edff;
+  --color-surface-container-high: #e1e8fd;
+  --color-surface-container-highest: #dce2f7;
+  --color-surface-variant: #dce2f7;
+  --color-outline: #916f6b;
+  --color-outline-variant: #e6bdb8;
+
+  /* On-surface */
+  --color-on-surface: #141b2b;
+  --color-on-surface-variant: #5c403c;
+  --color-on-background: #141b2b;
+
+  /* Safety — Blue (Tertiary) */
+  --color-tertiary: #004ed0;
+  --color-tertiary-container: #2d68f0;
+  --color-tertiary-fixed: #dbe1ff;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #f8f7ff;
+
+  /* Technical Help — Yellow (Secondary) */
+  --color-secondary: #735c00;
+  --color-secondary-container: #fed01b;
+  --color-secondary-fixed: #ffe083;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #6f5900;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+
+  /* Inverse */
+  --color-inverse-surface: #293040;
+  --color-inverse-on-surface: #edf0ff;
+
+  /* Fonts */
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pulse-sos {
+  0%   { transform: scale(0.97); box-shadow: 0 0 0 0 rgba(183, 0, 17, 0.6); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 28px rgba(183, 0, 17, 0); }
+  100% { transform: scale(0.97); box-shadow: 0 0 0 0 rgba(183, 0, 17, 0); }
+}
+.pulse-sos {
+  animation: pulse-sos 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes emergency-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+  70%  { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.pulse-marker {
+  animation: emergency-pulse 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.9); }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}
+
+/* ============================================================
+   MAP
+   ============================================================ */
+#leaflet-map {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+.leaflet-container {
+  font-family: 'Inter', sans-serif;
+}
+/* Leaflet custom markers */
+.alertify-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% 50% 50% 0;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transform: rotate(-45deg);
+  width: 36px;
+  height: 36px;
+}
+.alertify-marker .inner {
+  transform: rotate(45deg);
+  font-size: 17px;
+  color: white;
+}
+
+/* ============================================================
+   CHAT SCROLLBAR HIDE
+   ============================================================ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  * { box-sizing: border-box; }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SAHAAY SOS Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Leaflet CSS and JS for map features (as requested) -->
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script crossorigin="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#ffe083",
+                        "outline-variant": "#e6bdb8",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#293040",
+                        "error": "#ba1a1a",
+                        "background": "#f9f9ff",
+                        "primary-fixed-dim": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#574500",
+                        "surface-variant": "#dce2f7",
+                        "primary": "#b70011",
+                        "surface-container-high": "#e1e8fd",
+                        "on-primary-fixed": "#410002",
+                        "on-background": "#141b2b",
+                        "on-primary-fixed-variant": "#93000b",
+                        "secondary-container": "#fed01b",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#ffdad6",
+                        "tertiary-container": "#2d68f0",
+                        "secondary-fixed-dim": "#eec200",
+                        "on-tertiary-container": "#f8f7ff",
+                        "surface-tint": "#bf0715",
+                        "on-tertiary-fixed": "#00174b",
+                        "on-secondary-container": "#6f5900",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface": "#f9f9ff",
+                        "inverse-on-surface": "#edf0ff",
+                        "outline": "#916f6b",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb4ab",
+                        "surface-container": "#e9edff",
+                        "on-surface": "#141b2b",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#004ed0",
+                        "on-secondary-fixed": "#231b00",
+                        "on-surface-variant": "#5c403c",
+                        "tertiary-fixed": "#dbe1ff",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#735c00",
+                        "surface-container-highest": "#dce2f7",
+                        "primary-container": "#dc2626",
+                        "on-primary-container": "#fff6f5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d3daef",
+                        "surface-container-low": "#f1f3ff",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "safe-margin": "20px",
+                        "xl": "48px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-sos": ["Inter"],
+                        "label-bold": ["Inter"],
+                        "status-number": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-sos": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-bold": ["14px", { "lineHeight": "20px", "fontWeight": "700" }],
+                        "status-number": ["20px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-animation {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between p-gutter bg-surface sticky top-0 z-10 border-b border-surface-variant shadow-sm">
+<h1 class="text-headline-md text-primary font-bold tracking-tight">SAHAAY</h1>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high rounded-full">
+<span class="material-symbols-outlined text-sm text-tertiary" data-icon="lock" data-weight="fill">lock</span>
+<span class="text-label-bold text-on-surface-variant">Anonymous Mode</span>
+<label class="relative inline-flex items-center cursor-pointer ml-2">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-tertiary"></div>
+</label>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center justify-center p-safe-margin gap-lg max-w-md mx-auto w-full">
+<!-- Location Status -->
+<div class="w-full bg-surface-container rounded-xl p-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="my_location">my_location</span>
+</div>
+<div>
+<p class="text-label-bold text-on-surface-variant">Current Location</p>
+<p class="text-status-number text-on-surface font-mono" id="location-display">28.6139° N, 77.2090° E</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-tertiary animate-pulse" data-icon="satellite_alt">satellite_alt</span>
+</div>
+<!-- Main SOS Button -->
+<div class="py-xl w-full flex justify-center items-center">
+<button class="pulse-animation w-64 h-64 rounded-full bg-primary flex flex-col items-center justify-center gap-2 shadow-2xl transition-transform active:scale-95 hover:bg-surface-tint border-8 border-error-container" onclick="onSOSClick()">
+<span class="material-symbols-outlined text-white text-[80px]" data-icon="warning" data-weight="fill">warning</span>
+<span class="text-display-sos text-white uppercase tracking-widest mt-2">SOS</span>
+<span class="text-white text-sm font-semibold opacity-90 tracking-wide">BROADCAST ALERT</span>
+</button>
+</div>
+<!-- Category Grid -->
+<div class="w-full">
+<h2 class="text-headline-md mb-4 text-center">Specific Assistance</h2>
+<div class="grid grid-cols-3 gap-sm">
+<!-- Medical -->
+<button class="flex flex-col items-center justify-center gap-2 p-md bg-surface-container-lowest rounded-xl border border-surface-variant hover:bg-surface-container-low transition-colors shadow-sm focus:ring-2 focus:ring-primary">
+<div class="h-12 w-12 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-3xl" data-icon="local_hospital">local_hospital</span>
+</div>
+<span class="text-label-bold text-on-surface">Medical</span>
+</button>
+<!-- Safety -->
+<button class="flex flex-col items-center justify-center gap-2 p-md bg-surface-container-lowest rounded-xl border border-surface-variant hover:bg-surface-container-low transition-colors shadow-sm focus:ring-2 focus:ring-primary">
+<div class="h-12 w-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-3xl" data-icon="shield">shield</span>
+</div>
+<span class="text-label-bold text-on-surface">Safety</span>
+</button>
+<!-- Technical -->
+<button class="flex flex-col items-center justify-center gap-2 p-md bg-surface-container-lowest rounded-xl border border-surface-variant hover:bg-surface-container-low transition-colors shadow-sm focus:ring-2 focus:ring-primary">
+<div class="h-12 w-12 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined text-3xl" data-icon="handyman">handyman</span>
+</div>
+<span class="text-label-bold text-on-surface text-center leading-tight">Technical Help</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Shared Bottom Navigation (Destination screen, so include it) -->
+<div class="mt-auto w-full max-w-md mx-auto">
+<div class="flex gap-2 border-t border-surface-variant bg-surface px-4 pb-3 pt-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<a class="just flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-primary" href="#">
+<div class="text-primary bg-primary-fixed w-12 rounded-full flex h-8 items-center justify-center" data-icon="warning" data-size="24px" data-weight="fill">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<p class="text-primary text-xs font-medium leading-normal tracking-[0.015em]">SOS</p>
+</a>
+<a class="just flex flex-1 flex-col items-center justify-end gap-1 text-on-surface-variant hover:text-on-surface" href="#">
+<div class="text-on-surface-variant flex h-8 items-center justify-center" data-icon="history" data-size="24px" data-weight="regular">
+<span class="material-symbols-outlined">history</span>
+</div>
+<p class="text-on-surface-variant text-xs font-medium leading-normal tracking-[0.015em]">History</p>
+</a>
+<a class="just flex flex-1 flex-col items-center justify-end gap-1 text-on-surface-variant hover:text-on-surface" href="#">
+<div class="text-on-surface-variant flex h-8 items-center justify-center" data-icon="settings" data-size="24px" data-weight="regular">
+<span class="material-symbols-outlined">settings</span>
+</div>
+<p class="text-on-surface-variant text-xs font-medium leading-normal tracking-[0.015em]">Settings</p>
+</a>
+</div>
+</div>
+<!-- Scripts -->
+<script>
+        // Mock Firebase Boilerplate
+        const firebaseConfig = {
+            apiKey: "MOCK_API_KEY",
+            authDomain: "mock-sahaay.firebaseapp.com",
+            projectId: "mock-sahaay",
+            storageBucket: "mock-sahaay.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:mock123"
+        };
+        console.log("Firebase initialized with mock config", firebaseConfig);
+
+        // Core Interaction Function
+        function onSOSClick() {
+            const sessionId = 'SOS-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5).toUpperCase();
+            console.log(`Alert Broadcasted! Session ID: ${sessionId}`);
+            
+            // Visual feedback on mock location
+            const locDisplay = document.getElementById('location-display');
+            locDisplay.classList.add('text-primary');
+            setTimeout(() => locDisplay.classList.remove('text-primary'), 500);
+            
+            alert(`EMERGENCY BROADCAST SENT\nSession ID: ${sessionId}\nAnonymous Mode: Active`);
+        }
+    </script>
+</body></html>

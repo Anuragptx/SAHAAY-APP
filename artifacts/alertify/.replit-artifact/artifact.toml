@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Alertify – Anonymous SOS"
+version = "1.0.0"
+id = "artifacts/alertify"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21946
+
+[services.development]
+run = "pnpm --filter @workspace/alertify run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/alertify", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/alertify/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21946"
+BASE_PATH = "/"
