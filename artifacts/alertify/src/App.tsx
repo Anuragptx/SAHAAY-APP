@@ -5,6 +5,7 @@ import ChatList from './pages/ChatList';
 import Chat from './pages/Chat';
 import BottomNav from './components/BottomNav';
 import { type AlertCategory } from './lib/firebase';
+import { useTheme } from './lib/theme';
 
 type Tab = 'dashboard' | 'map' | 'chat';
 
@@ -31,8 +32,9 @@ interface ActiveChat {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [activeChat, setActiveChat] = useState<ActiveChat | null>(null);
+  const { isDark, toggleDark }        = useTheme();
+  const [activeTab, setActiveTab]     = useState<Tab>('dashboard');
+  const [activeChat, setActiveChat]   = useState<ActiveChat | null>(null);
   const [lastAlertId, setLastAlertId] = useState<string | undefined>();
 
   const handleAlertBroadcast = (alertId: string, _category: AlertCategory) => {
@@ -47,7 +49,6 @@ export default function App() {
 
   const closeChat = () => {
     setActiveChat(null);
-    // Go back to chat list if we came from there, otherwise map
     setActiveTab('chat');
   };
 
@@ -59,6 +60,8 @@ export default function App() {
           alertId={activeChat.alertId}
           category={activeChat.category}
           expiresAt={activeChat.expiresAt}
+          isDark={isDark}
+          toggleDark={toggleDark}
           onBack={closeChat}
         />
       </div>
@@ -69,19 +72,25 @@ export default function App() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-hidden">
         {activeTab === 'dashboard' && (
-          <SOSDashboard onAlertBroadcast={handleAlertBroadcast} />
+          <SOSDashboard
+            onAlertBroadcast={handleAlertBroadcast}
+            isDark={isDark}
+            toggleDark={toggleDark}
+          />
         )}
         {activeTab === 'map' && (
           <LiveMap
             activeAlertId={lastAlertId}
+            isDark={isDark}
+            toggleDark={toggleDark}
             onOpenChat={(id, cat, exp) => openChat(id, cat, exp)}
           />
         )}
         {activeTab === 'chat' && !activeChat && (
-          <ChatList onJoin={openChat} />
+          <ChatList onJoin={openChat} isDark={isDark} toggleDark={toggleDark} />
         )}
       </div>
-      <BottomNav active={activeTab} onChange={(tab) => { setActiveTab(tab); }} />
+      <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );
 }

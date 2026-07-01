@@ -19,10 +19,12 @@ interface PopupState {
 
 interface LiveMapProps {
   activeAlertId?: string;
+  isDark: boolean;
+  toggleDark: () => void;
   onOpenChat: (alertId: string, category: AlertCategory, expiresAt: Date | null) => void;
 }
 
-export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
+export default function LiveMap({ activeAlertId, isDark, toggleDark, onOpenChat }: LiveMapProps) {
   const mapRef       = useRef<L.Map | null>(null);
   const mapDivRef    = useRef<HTMLDivElement>(null);
   const markersRef   = useRef<Map<string, L.Marker>>(new Map());
@@ -192,14 +194,25 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
   return (
     <div className="flex flex-col h-full relative bg-[#e5e3df]">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 h-16 bg-[#f9f9ff] border-b border-[#dce2f7] shadow-sm shrink-0 z-20">
+      <header className="flex items-center justify-between px-5 h-16 bg-surface border-b border-surface-variant shadow-sm shrink-0 z-20 transition-colors">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[#b70011] text-[26px]" style={{ fontVariationSettings: "'FILL' 1" }}>shield_with_heart</span>
           <span className="text-[20px] font-black tracking-tight text-[#b70011]">Alertify</span>
         </div>
-        <div className="flex items-center gap-2 bg-[#f1f3ff] border border-[#dce2f7] px-3 py-1 rounded-full">
-          <div className={`w-2 h-2 rounded-full ${gpsOk ? 'bg-emerald-500' : 'bg-amber-400'} pulse-dot`} />
-          <span className="text-[12px] font-semibold text-[#5c403c]">{gpsOk ? 'GPS Active' : 'Locating…'}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-surface-container-low border border-surface-variant px-3 py-1 rounded-full">
+            <div className={`w-2 h-2 rounded-full ${gpsOk ? 'bg-emerald-500' : 'bg-amber-400'} pulse-dot`} />
+            <span className="text-[12px] font-semibold text-on-surface-variant">{gpsOk ? 'GPS Active' : 'Locating…'}</span>
+          </div>
+          <button
+            onClick={toggleDark}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+            aria-label={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {isDark ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
         </div>
       </header>
 
@@ -209,23 +222,23 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
 
         {/* GPS denied / unavailable banner */}
         {gpsError && (
-          <div className="absolute top-3 left-3 right-3 z-20 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-start gap-2 shadow-md animate-fade-in">
-            <span className="material-symbols-outlined text-amber-600 text-[20px] mt-0.5 shrink-0">gps_off</span>
-            <p className="text-[12px] text-amber-800 leading-relaxed">{gpsError}</p>
+          <div className="absolute top-3 left-3 right-3 z-20 bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 rounded-xl px-4 py-3 flex items-start gap-2 shadow-md animate-fade-in">
+            <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px] mt-0.5 shrink-0">gps_off</span>
+            <p className="text-[12px] text-amber-800 dark:text-amber-300 leading-relaxed">{gpsError}</p>
           </div>
         )}
 
         {/* Legend overlay */}
-        <div className={`absolute ${gpsError ? 'top-[5.5rem]' : 'top-3'} left-3 z-10 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-[#dce2f7]/60`}>
-          <p className="text-[10px] font-bold text-[#5c403c] uppercase tracking-widest mb-2">Active Alerts · 2km</p>
+        <div className={`absolute ${gpsError ? 'top-[5.5rem]' : 'top-3'} left-3 z-10 bg-surface-container-lowest/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-surface-variant/60 transition-colors`}>
+          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Active Alerts · 2km</p>
           {Object.entries(CAT_CONFIG).map(([cat, { color, label }]) => (
             <div key={cat} className="flex items-center gap-2 mb-1.5 last:mb-0">
-              <div style={{ background: color }} className="w-3.5 h-3.5 rounded-full border border-white shadow-sm flex-shrink-0" />
-              <span className="text-[11px] text-[#5c403c] font-medium">{label}</span>
+              <div style={{ background: color }} className="w-3.5 h-3.5 rounded-full border border-surface-container-lowest shadow-sm flex-shrink-0" />
+              <span className="text-[11px] text-on-surface-variant font-medium">{label}</span>
             </div>
           ))}
           {nearbyCount > 0 && (
-            <div className="mt-2 pt-2 border-t border-[#dce2f7]">
+            <div className="mt-2 pt-2 border-t border-surface-variant">
               <span className="text-[11px] font-bold text-[#b70011]">{nearbyCount} active nearby</span>
             </div>
           )}
@@ -234,7 +247,7 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
         {/* Re-centre button */}
         <button
           onClick={centerOnMe}
-          className="absolute bottom-4 right-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-[#b70011] border border-[#dce2f7] hover:bg-[#f1f3ff] transition-colors"
+          className="absolute bottom-4 right-4 z-10 w-12 h-12 bg-surface-container-lowest rounded-full shadow-lg flex items-center justify-center text-[#b70011] border border-surface-variant hover:bg-surface-container-low transition-colors"
         >
           <span className="material-symbols-outlined text-[24px]">my_location</span>
         </button>
@@ -242,8 +255,10 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
         {/* Alert popup */}
         {popup && (
           <div className="absolute bottom-6 left-3 right-3 z-20 animate-fade-in">
-            <div className={`bg-white rounded-xl shadow-2xl border-l-[5px] overflow-hidden`}
-              style={{ borderLeftColor: CAT_CONFIG[popup.alert.category].color }}>
+            <div
+              className="bg-surface-container-lowest rounded-xl shadow-2xl border-l-[5px] overflow-hidden transition-colors"
+              style={{ borderLeftColor: CAT_CONFIG[popup.alert.category].color }}
+            >
               <div className="p-4">
                 <div className="flex items-start justify-between mb-1">
                   <span
@@ -254,34 +269,33 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
                   </span>
                   <div className="flex items-center gap-1">
                     {popup.alert.expiresAt && (
-                      <span className="text-[10px] text-[#b70011] font-bold bg-red-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] text-[#b70011] font-bold bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <span className="material-symbols-outlined text-[11px]">timer</span>
                         {timeRemaining(popup.alert.expiresAt.toDate())}
                       </span>
                     )}
                     <button
                       onClick={() => setPopup(null)}
-                      className="ml-1 text-[#5c403c] hover:text-[#141b2b] p-0.5"
+                      className="ml-1 text-on-surface-variant hover:text-on-surface p-0.5"
                     >
                       <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>
                   </div>
                 </div>
 
-                <p className="text-[16px] font-bold text-[#141b2b] leading-snug">
+                <p className="text-[16px] font-bold text-on-surface leading-snug">
                   {CAT_CONFIG[popup.alert.category].label}
                 </p>
-                <p className="text-[13px] text-[#5c403c] mt-0.5 flex items-center gap-1">
+                <p className="text-[13px] text-on-surface-variant mt-0.5 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[13px]">near_me</span>
                   {popup.distKm > 0 ? `${popup.distKm.toFixed(1)} km away` : 'Location acquired'}
                 </p>
                 {myCoords && (
-                  <p className="text-[11px] font-mono text-[#916f6b] mt-0.5">
+                  <p className="text-[11px] font-mono text-outline mt-0.5">
                     {formatCoords(popup.alert.lat, popup.alert.lng)}
                   </p>
                 )}
 
-                {/* Only show "I can help" if it's not our own alert */}
                 {popup.alert.sessionId !== getSessionId() ? (
                   <button
                     onClick={() => {
@@ -293,7 +307,7 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
                     I CAN HELP
                   </button>
                 ) : (
-                  <div className="mt-3 w-full bg-[#f1f3ff] text-[#5c403c] font-bold py-3 rounded-lg flex items-center justify-center gap-2 text-[14px]">
+                  <div className="mt-3 w-full bg-surface-container-low text-on-surface-variant font-bold py-3 rounded-lg flex items-center justify-center gap-2 text-[14px]">
                     <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>how_to_reg</span>
                     Your active alert
                   </div>
