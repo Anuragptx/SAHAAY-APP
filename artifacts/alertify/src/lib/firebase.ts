@@ -82,6 +82,7 @@ export interface Alert {
 
 export interface ChatMessage {
   id?: string;
+  clientId?: string;  // Stable client-generated ID for optimistic dedup
   sessionId: string;
   text: string;
   sentAt: Timestamp | null;
@@ -162,9 +163,11 @@ export async function sendMessage(
   alertId: string,
   sessionId: string,
   text: string,
+  clientId: string,
 ): Promise<void> {
   const expiresAt = Timestamp.fromDate(new Date(Date.now() + TWO_HOURS_MS));
   await addDoc(collection(db, 'chats', alertId, 'messages'), {
+    clientId,
     sessionId,
     text: text.trim(),
     sentAt: serverTimestamp(),
@@ -189,3 +192,55 @@ export function subscribeToMessages(
     onUpdate(msgs);
   });
 }
+
+// ============================================================
+// TYPING INDICATOR HELPERS
+// Stored at: chats/{alertId}/typing/{sessionId}
+// Each doc: { sessionId, updatedAt }
+// Considered "typing" if updatedAt is within last 5 seconds.
+// ============================================================
+
+import { setDoc } from 'firebase/firestore';
+
+export async function setTypingIndicator(
+  alertId: string,
+  sessionId: string,
+): Promise<void> {
+  await setDoc(doc(db, 'chats', alertId, 'typing', sessionId), {
+    sessionId,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function clearTypingIndicator(
+  alertId: string,
+  sessionId: string,
+): Promise<void> {
+  await deleteDoc(doc(db, 'chats', alertId, 'typing', sessionId));
+}
+
+/** Subscribe to typing indicators for an alert (sessions typing in last 5s). */
+export function subscribeToTyping(
+  alertId: string,
+  mySessionId: string,
+  onUpdate: (typingSessionIds: string[]) => void,
+): () => void {
+  const colRef = collection(db, 'chats', alertId, 'typing');
+  return onSnapshot(colRef, (snap) => {
+    const fiveSecondsAgo = Date.now() - 5000;
+    const typing = snap.docs
+      .filter((d) => {
+        const data = d.data();
+        const updatedAt = data.updatedAt as Timestamp | null;
+        return (
+          d.id !== mySessionId &&
+          updatedAt &&
+          updatedAt.toMillis() > fiveSecondsAgo
+        );
+      })
+      .map((d) => d.data().sessionId as string);
+    onUpdate(typing);
+  });
+}
+
+export { TWO_HOURS_MS };

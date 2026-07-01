@@ -19,7 +19,7 @@ interface PopupState {
 
 interface LiveMapProps {
   activeAlertId?: string;
-  onOpenChat: (alertId: string, category: AlertCategory) => void;
+  onOpenChat: (alertId: string, category: AlertCategory, expiresAt: Date | null) => void;
 }
 
 export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
@@ -285,7 +285,7 @@ export default function LiveMap({ activeAlertId, onOpenChat }: LiveMapProps) {
                 {popup.alert.sessionId !== getSessionId() ? (
                   <button
                     onClick={() => {
-                      if (popup.alert.id) onOpenChat(popup.alert.id, popup.alert.category);
+                      if (popup.alert.id) onOpenChat(popup.alert.id, popup.alert.category, popup.alert.expiresAt?.toDate() ?? null);
                     }}
                     className="mt-3 w-full bg-[#dc2626] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
                   >
