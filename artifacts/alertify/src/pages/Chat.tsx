@@ -328,8 +328,10 @@ export default function Chat({ alertId, category, expiresAt, onBack }: ChatProps
 
             const msgSessionId = fmsg?.sessionId ?? lmsg!.sessionId;
             const msgText      = fmsg?.text ?? lmsg!.text;
-            const msgDate      = fmsg?.sentAt
-              ? fmsg.sentAt.toDate()
+            // Guard: fmsg.sentAt may be null while the server timestamp resolves.
+            // Never fall through to lmsg when the item is a Firestore message.
+            const msgDate = isFirestore
+              ? (fmsg!.sentAt ? fmsg!.sentAt.toDate() : new Date())
               : lmsg!.sentAt;
             const isPending    = lmsg?.status === 'sending';
             const isFailed     = lmsg?.status === 'failed';
