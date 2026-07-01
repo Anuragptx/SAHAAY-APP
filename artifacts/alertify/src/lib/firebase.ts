@@ -47,6 +47,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  setDoc,
 } from 'firebase/firestore';
 
 // ↓↓↓ REPLACE THESE WITH YOUR FIREBASE PROJECT VALUES ↓↓↓
