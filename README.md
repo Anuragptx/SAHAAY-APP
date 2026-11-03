@@ -60,7 +60,7 @@ pnpm --filter @workspace/alertify run dev
 
 ### 👨‍💻 Developer
 
-**Your Name**
+**Anurag Gupta**
 
 GitHub: Anuragptx
 
